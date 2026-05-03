@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Modo Explorador Luc</title>
+
+  <style>
+    body {
+      background: radial-gradient(circle, #0a0a0a, #000);
+      color: #00ffcc;
+      font-family: 'Courier New', monospace;
+      text-align: center;
+    }
+
+    button {
+      padding: 10px 18px;
+      margin: 6px;
+      border-radius: 10px;
+      border: none;
+      background: #1f1f1f;
+      color: #00ffcc;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #00ffcc;
+      color: black;
+    }
+
+    .box {
+      padding: 20px;
+      border: 1px solid #00ffcc;
+      border-radius: 12px;
+      margin: 20px;
+    }
+
+    .bar {
+      height: 18px;
+      background: #222;
+      border-radius: 10px;
+      margin: 5px;
+    }
+
+    .fill {
+      height: 100%;
+      border-radius: 10px;
+    }
+
+    .vida {
+      background: #00ffcc;
+    }
+
+    .energia {
+      background: #3399ff;
+    }
+
+    .ira {
+      background: #ff4444;
+    }
+
+    .conexion {
+      background: #66ff99;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>🎮 MODO EXPLORADOR LUC</h1>
+  <div id="contenido" class="box">
+    
+  </div>
+
+  <script>
+
+    let p;
+    let mundos;
+
+    inicio();
+
+    function inicio() {
+
+      let guardado = localStorage.getItem("exploradorLuc");
+
+      if (guardado) {
+        contenido.innerHTML = `
+<h2>¿Quieres continuar tu partida?</h2>
+<button onclick="cargar()">▶ Continuar</button>
+<button onclick="nuevo()">🆕 Empezar de nuevo</button>
+`;
+      } else {
+        nuevo();
+      }
+    }
+
+    function nuevo() {
+      p = {
+        nombre: "",
+        avatar: "",
+        vida: 80,
+        energia: 60,
+        ira: 20,
+        conexion: 30
+      };
+
+      mundos = {
+        gamer: false,
+        energia: false,
+        social: false,
+        evento: false
+      };
+
+      crearPersonaje();
+    }
+
+    function crearPersonaje() {
+      contenido.innerHTML = `
+<h2>Crear personaje</h2>
+<input id="nombre" placeholder="Tu nombre"><br><br>
+
+<p>Elige tu avatar:</p>
+<button onclick="setAvatar('😎')">😎</button>
+<button onclick="setAvatar('🤖')">🤖</button>
+<button onclick="setAvatar('🎮')">🎮</button>
+`;
+    }
+
+    function setAvatar(a) {
+      p.avatar = a;
+      contenido.innerHTML += `
+<p>Cuando estés listo:</p>
+<button onclick="crear()">Comenzar juego</button>
+`;
+    }
+
+    function crear() {
+      p.nombre = document.getElementById("nombre").value;
+      if (!p.nombre) return alert("Escribe un nombre 😊");
+
+      guardar();
+      hub();
+    }
+
+    function guardar() {
+      localStorage.setItem("exploradorLuc", JSON.stringify({ p, mundos }));
+    }
+
+    function cargar() {
+      let data = JSON.parse(localStorage.getItem("exploradorLuc"));
+      p = data.p;
+      mundos = data.mundos;
+      hub();
+    }
+
+    function HUD() {
+      return `
+<h3>${p.avatar} ${p.nombre}</h3>
+
+❤️<div class="bar"><div class="fill vida" style="width:${p.vida}%"></div></div>
+⚡<div class="bar"><div class="fill energia" style="width:${p.energia}%"></div></div>
+🔥<div class="bar"><div class="fill ira" style="width:${p.ira}%"></div></div>
+🤝<div class="bar"><div class="fill conexion" style="width:${p.conexion}%"></div></div>
+`;
+    }
+
+    function hub() {
+      guardar();
+
+      contenido.innerHTML = HUD() + `
+<h2>🌍 Elige a dónde ir</h2>
+
+<button onclick="gamer()">🎮 Juego ${mundos.gamer ? "✅" : "🔓"}</button>
+<button onclick="energia()">😴 Energía ${mundos.energia ? "✅" : "🔓"}</button>
+<button onclick="social()">👥 Personas ${mundos.social ? "✅" : "🔓"}</button>
+
+<button onclick="evento()" ${mundos.gamer && mundos.energia && mundos.social ? "" : "disabled"}>
+⚠ Situación difícil ${mundos.evento ? "✅" : "🔒"}
+</button>
+
+<br><br>
+<button onclick="mision()">🎯 Ver misión</button>
+<button onclick="reset()">🗑 Reiniciar</button>
+`;
+    }
+
+    function gamer() {
+      contenido.innerHTML = HUD() + `
+<h2>🎮 Estás jugando</h2>
+<p>Perdiste una partida importante...</p>
+
+<button onclick="act('ira','gamer')">😤 Salir enojado del juego</button>
+<button onclick="act('neutral','gamer')">🤐 Quedarte callado</button>
+<button onclick="act('calma','gamer')">🧠 Intentar de nuevo</button>
+`;
+    }
+
+    function energia() {
+      contenido.innerHTML = HUD() + `
+<h2>😴 Estás cansado</h2>
+<p>No dormiste bien...</p>
+
+<button onclick="act('seguir','energia')">🎮 Seguir jugando igual</button>
+<button onclick="act('descansar','energia')">🛌 Descansar un rato</button>
+<button onclick="act('ignorar','energia')">📱 Seguir en pantalla</button>
+`;
+    }
+
+    function social() {
+      contenido.innerHTML = HUD() + `
+<h2>👥 Te invitan</h2>
+<p>Un amigo te invita a salir</p>
+
+<button onclick="act('evitar','social')">🚪 No ir y quedarte en la pieza</button>
+<button onclick="act('ir','social')">🤝 Ir</button>
+<button onclick="act('medio','social')">😐 Decir “tal vez”</button>
+`;
+    }
+
+    function evento() {
+      contenido.innerHTML = HUD() + `
+<h2>⚠ Situación difícil</h2>
+<p>Hoy fue un día complicado...</p>
+
+<button onclick="act('aislar','evento')">🔒 Aislarse</button>
+<button onclick="act('hablar','evento')">💬 Hablar con alguien</button>
+<button onclick="act('explosion','evento')">💥 Enojarse mucho</button>
+`;
+    }
+
+    function act(tipo, mundo) {
+
+      if (tipo == "ira") { p.ira += 15; p.energia -= 10; }
+      if (tipo == "calma") { p.ira -= 5; p.energia += 10; }
+      if (tipo == "neutral") { p.ira += 5; }
+
+      if (tipo == "seguir") { p.energia -= 15; }
+      if (tipo == "descansar") { p.energia += 20; }
+      if (tipo == "ignorar") { p.energia -= 10; p.ira += 5; }
+
+      if (tipo == "evitar") { p.conexion -= 15; }
+      if (tipo == "ir") { p.conexion += 20; }
+      if (tipo == "medio") { p.conexion += 5; }
+
+      if (tipo == "aislar") { p.conexion -= 20; }
+      if (tipo == "hablar") { p.conexion += 20; p.ira -= 5; }
+      if (tipo == "explosion") { p.ira += 20; }
+
+      mundos[mundo] = true;
+
+      guardar();
+      feedback();
+    }
+
+    function feedback() {
+
+      let mensaje = "✨ Tu personaje está estable";
+
+      if (p.ira > 70) mensaje = "🔥 Tu personaje está muy enojado";
+      else if (p.energia < 30) mensaje = "⚡ Tu personaje está muy cansado";
+      else if (p.conexion < 20) mensaje = "🤝 Tu personaje está muy solo";
+
+      contenido.innerHTML = HUD() + `
+<h2>${mensaje}</h2>
+
+<button onclick="hub()">🌍 Volver</button>
+<button onclick="mision()">🎯 Ver misión</button>
+`;
+    }
+
+    function mision() {
+
+      let principal = "";
+      let secundaria = "";
+
+      if (p.ira > 60) {
+        principal = "🔥 Notar cuándo te enojas";
+        secundaria = "🌱 Tomarte un segundo antes de reaccionar";
+      }
+      else if (p.conexion < 30) {
+        principal = "🤝 Hablar con alguien";
+        secundaria = "🚶 Salir un rato de la pieza";
+      }
+      else if (p.energia < 40) {
+        principal = "😴 Dormir mejor";
+        secundaria = "📴 Dejar el celular antes de dormir";
+      }
+      else {
+        principal = "🌟 Seguir haciendo lo que te está ayudando";
+        secundaria = "🎯 Elegir algo pequeño para mejorar";
+      }
+
+      contenido.innerHTML = HUD() + `
+        <h2>🎯 MISIÓN</h2>
+
+        <p><b>Principal:</b> ${principal}</p>
+        <p><b>Otra opción:</b> ${secundaria}</p>
+
+        <button onclick="hub()">🌍 Seguir jugando</button>
+        `;
+    }
+
+    function reset() {
+      localStorage.removeItem("exploradorLuc");
+      location.reload();
+    }
+
+  </script>
+</body>
+
+</html>
