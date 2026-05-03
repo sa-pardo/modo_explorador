@@ -70,6 +70,27 @@
       background: #66ff99;
     }
 
+    #input-nombre {
+      background: #1f1f1f;
+      border: 2px solid #00ffcc;
+      border-radius: 10px;
+      color: #00ffcc;
+      font-family: 'Courier New', monospace;
+      font-size: 16px;
+      padding: 10px 18px;
+      outline: none;
+      transition: box-shadow 0.3s ease;
+    }
+
+    #input-nombre::placeholder {
+      color: #00ffcc;
+      opacity: 0.4;
+    }
+
+    #input-nombre:focus {
+      box-shadow: 0 0 12px #00ffcc;
+    }
+
     .screen {
       display: none;
     }
