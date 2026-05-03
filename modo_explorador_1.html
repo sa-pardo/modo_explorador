@@ -28,6 +28,12 @@
       color: black;
     }
 
+    button.activo {
+      background: #00ffcc;
+      color: black;
+      box-shadow: 0 0 10px #00ffcc;
+    }
+
     .box {
       padding: 20px;
       border: 1px solid #00ffcc;
@@ -45,6 +51,7 @@
     .fill {
       height: 100%;
       border-radius: 10px;
+      transition: width 0.6s ease;
     }
 
     .vida {
@@ -62,14 +69,108 @@
     .conexion {
       background: #66ff99;
     }
+
+    .screen {
+      display: none;
+    }
   </style>
 </head>
 
 <body>
 
   <h1>🎮 MODO EXPLORADOR LUC</h1>
-  <div id="contenido" class="box">
-    
+
+  <div class="box">
+    <div id="hud" style="display:none">
+      <div id="hud-title"></div>
+      ❤️<div class="bar">
+        <div id="bar-vida" class="fill vida"></div>
+      </div>
+      ⚡<div class="bar">
+        <div id="bar-energia" class="fill energia"></div>
+      </div>
+      🔥<div class="bar">
+        <div id="bar-ira" class="fill ira"></div>
+      </div>
+      🤝<div class="bar">
+        <div id="bar-conexion" class="fill conexion"></div>
+      </div>
+    </div>
+
+    <div class="screen box" id="screen-inicio">
+      <h2>¿Quieres continuar tu partida?</h2>
+      <button id="btn-continuar">▶ Continuar</button>
+      <button id="btn-nuevo">🆕 Empezar de nuevo</button>
+    </div>
+
+    <div class="screen box" id="screen-crear">
+      <h2>Crear personaje</h2>
+      <input id="input-nombre" placeholder="Tu nombre"><br><br>
+      <p>Elige tu avatar:</p>
+      <button data-avatar="😎">😎</button>
+      <button data-avatar="🤖">🤖</button>
+      <button data-avatar="🎮">🎮</button>
+      <div id="comenzar-container" style="display:none">
+        <p>Cuando estés listo:</p>
+        <button id="btn-comenzar">Comenzar juego</button>
+      </div>
+    </div>
+
+    <div class="screen box" id="screen-hub">
+      <h2>🌍 Elige a dónde ir</h2>
+      <button id="btn-gamer">🎮 Juego 🔓</button>
+      <button id="btn-energia">😴 Energía 🔓</button>
+      <button id="btn-social">👥 Personas 🔓</button>
+      <button id="btn-evento" disabled>⚠ Situación difícil 🔒</button>
+      <br><br>
+      <button id="btn-mision">🎯 Ver misión</button>
+      <button id="btn-reset">🗑 Reiniciar</button>
+    </div>
+
+    <div class="screen box" id="screen-gamer">
+      <h2>🎮 Estás jugando</h2>
+      <p>Perdiste una partida importante...</p>
+      <button data-action="ira" data-mundo="gamer">😤 Salir enojado del juego</button>
+      <button data-action="neutral" data-mundo="gamer">🤐 Quedarte callado</button>
+      <button data-action="calma" data-mundo="gamer">🧠 Intentar de nuevo</button>
+    </div>
+
+    <div class="screen box" id="screen-energia">
+      <h2>😴 Estás cansado</h2>
+      <p>No dormiste bien...</p>
+      <button data-action="seguir" data-mundo="energia">🎮 Seguir jugando igual</button>
+      <button data-action="descansar" data-mundo="energia">🛌 Descansar un rato</button>
+      <button data-action="ignorar" data-mundo="energia">📱 Seguir en pantalla</button>
+    </div>
+
+    <div class="screen box" id="screen-social">
+      <h2>👥 Te invitan</h2>
+      <p>Un amigo te invita a salir</p>
+      <button data-action="evitar" data-mundo="social">🚪 No ir y quedarte en la pieza</button>
+      <button data-action="ir" data-mundo="social">🤝 Ir</button>
+      <button data-action="medio" data-mundo="social">😐 Decir "tal vez"</button>
+    </div>
+
+    <div class="screen box" id="screen-evento">
+      <h2>⚠ Situación difícil</h2>
+      <p>Hoy fue un día complicado...</p>
+      <button data-action="aislar" data-mundo="evento">🔒 Aislarse</button>
+      <button data-action="hablar" data-mundo="evento">💬 Hablar con alguien</button>
+      <button data-action="explosion" data-mundo="evento">💥 Enojarse mucho</button>
+    </div>
+
+    <div class="screen box" id="screen-feedback">
+      <h2 id="feedback-mensaje"></h2>
+      <button id="btn-volver">🌍 Volver</button>
+      <button id="btn-ver-mision">🎯 Ver misión</button>
+    </div>
+
+    <div class="screen box" id="screen-mision">
+      <h2>🎯 MISIÓN</h2>
+      <p><b>Principal:</b> <span id="mision-principal"></span></p>
+      <p><b>Otra opción:</b> <span id="mision-secundaria"></span></p>
+      <button id="btn-seguir">🌍 Seguir jugando</button>
+    </div>
   </div>
 
   <script>
@@ -80,15 +181,9 @@
     inicio();
 
     function inicio() {
-
       let guardado = localStorage.getItem("exploradorLuc");
-
       if (guardado) {
-        contenido.innerHTML = `
-<h2>¿Quieres continuar tu partida?</h2>
-<button onclick="cargar()">▶ Continuar</button>
-<button onclick="nuevo()">🆕 Empezar de nuevo</button>
-`;
+        mostrarPantalla('screen-inicio');
       } else {
         nuevo();
       }
@@ -103,41 +198,33 @@
         ira: 20,
         conexion: 30
       };
-
       mundos = {
         gamer: false,
         energia: false,
         social: false,
         evento: false
       };
-
       crearPersonaje();
     }
 
     function crearPersonaje() {
-      contenido.innerHTML = `
-<h2>Crear personaje</h2>
-<input id="nombre" placeholder="Tu nombre"><br><br>
-
-<p>Elige tu avatar:</p>
-<button onclick="setAvatar('😎')">😎</button>
-<button onclick="setAvatar('🤖')">🤖</button>
-<button onclick="setAvatar('🎮')">🎮</button>
-`;
+      mostrarPantalla('screen-crear');
+      document.getElementById('input-nombre').value = '';
+      p.avatar = '';
+      document.querySelectorAll('[data-avatar]').forEach(btn => btn.classList.remove('activo'));
+      document.getElementById('comenzar-container').style.display = 'none';
     }
 
     function setAvatar(a) {
       p.avatar = a;
-      contenido.innerHTML += `
-<p>Cuando estés listo:</p>
-<button onclick="crear()">Comenzar juego</button>
-`;
+      document.querySelectorAll('[data-avatar]').forEach(btn => btn.classList.remove('activo'));
+      document.querySelector(`[data-avatar="${a}"]`).classList.add('activo');
+      document.getElementById('comenzar-container').style.display = 'block';
     }
 
     function crear() {
-      p.nombre = document.getElementById("nombre").value;
+      p.nombre = document.getElementById("input-nombre").value;
       if (!p.nombre) return alert("Escribe un nombre 😊");
-
       guardar();
       hub();
     }
@@ -153,83 +240,44 @@
       hub();
     }
 
-    function HUD() {
-      return `
-<h3>${p.avatar} ${p.nombre}</h3>
+    function actualizarHUD() {
+      document.getElementById('hud-title').textContent = `${p.avatar} ${p.nombre}`;
+      document.getElementById('bar-vida').style.width = p.vida + '%';
+      document.getElementById('bar-energia').style.width = p.energia + '%';
+      document.getElementById('bar-ira').style.width = p.ira + '%';
+      document.getElementById('bar-conexion').style.width = p.conexion + '%';
 
-❤️<div class="bar"><div class="fill vida" style="width:${p.vida}%"></div></div>
-⚡<div class="bar"><div class="fill energia" style="width:${p.energia}%"></div></div>
-🔥<div class="bar"><div class="fill ira" style="width:${p.ira}%"></div></div>
-🤝<div class="bar"><div class="fill conexion" style="width:${p.conexion}%"></div></div>
-`;
+      document.getElementById('btn-gamer').textContent = '🎮 Juego ' + (mundos.gamer ? '✅' : '🔓');
+      document.getElementById('btn-energia').textContent = '😴 Energía ' + (mundos.energia ? '✅' : '🔓');
+      document.getElementById('btn-social').textContent = '👥 Personas ' + (mundos.social ? '✅' : '🔓');
+
+      let todos = mundos.gamer && mundos.energia && mundos.social;
+      let btnEvento = document.getElementById('btn-evento');
+      btnEvento.disabled = !todos;
+      btnEvento.textContent = '⚠ Situación difícil ' + (mundos.evento ? '✅' : todos ? '🔓' : '🔒');
+    }
+
+    function mostrarPantalla(id) {
+      document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+      document.getElementById(id).style.display = 'block';
+
+      let conHUD = id !== 'screen-inicio' && id !== 'screen-crear';
+      document.getElementById('hud').style.display = conHUD ? 'block' : 'none';
+
+      if (conHUD) actualizarHUD();
     }
 
     function hub() {
       guardar();
-
-      contenido.innerHTML = HUD() + `
-<h2>🌍 Elige a dónde ir</h2>
-
-<button onclick="gamer()">🎮 Juego ${mundos.gamer ? "✅" : "🔓"}</button>
-<button onclick="energia()">😴 Energía ${mundos.energia ? "✅" : "🔓"}</button>
-<button onclick="social()">👥 Personas ${mundos.social ? "✅" : "🔓"}</button>
-
-<button onclick="evento()" ${mundos.gamer && mundos.energia && mundos.social ? "" : "disabled"}>
-⚠ Situación difícil ${mundos.evento ? "✅" : "🔒"}
-</button>
-
-<br><br>
-<button onclick="mision()">🎯 Ver misión</button>
-<button onclick="reset()">🗑 Reiniciar</button>
-`;
+      mostrarPantalla('screen-hub');
     }
 
-    function gamer() {
-      contenido.innerHTML = HUD() + `
-<h2>🎮 Estás jugando</h2>
-<p>Perdiste una partida importante...</p>
-
-<button onclick="act('ira','gamer')">😤 Salir enojado del juego</button>
-<button onclick="act('neutral','gamer')">🤐 Quedarte callado</button>
-<button onclick="act('calma','gamer')">🧠 Intentar de nuevo</button>
-`;
-    }
-
-    function energia() {
-      contenido.innerHTML = HUD() + `
-<h2>😴 Estás cansado</h2>
-<p>No dormiste bien...</p>
-
-<button onclick="act('seguir','energia')">🎮 Seguir jugando igual</button>
-<button onclick="act('descansar','energia')">🛌 Descansar un rato</button>
-<button onclick="act('ignorar','energia')">📱 Seguir en pantalla</button>
-`;
-    }
-
-    function social() {
-      contenido.innerHTML = HUD() + `
-<h2>👥 Te invitan</h2>
-<p>Un amigo te invita a salir</p>
-
-<button onclick="act('evitar','social')">🚪 No ir y quedarte en la pieza</button>
-<button onclick="act('ir','social')">🤝 Ir</button>
-<button onclick="act('medio','social')">😐 Decir “tal vez”</button>
-`;
-    }
-
-    function evento() {
-      contenido.innerHTML = HUD() + `
-<h2>⚠ Situación difícil</h2>
-<p>Hoy fue un día complicado...</p>
-
-<button onclick="act('aislar','evento')">🔒 Aislarse</button>
-<button onclick="act('hablar','evento')">💬 Hablar con alguien</button>
-<button onclick="act('explosion','evento')">💥 Enojarse mucho</button>
-`;
-    }
+    function gamer() { mostrarPantalla('screen-gamer'); }
+    function energia() { mostrarPantalla('screen-energia'); }
+    function social() { mostrarPantalla('screen-social'); }
+    function evento() { mostrarPantalla('screen-evento'); }
 
     function act(tipo, mundo) {
-
       if (tipo == "ira") { p.ira += 15; p.energia -= 10; }
       if (tipo == "calma") { p.ira -= 5; p.energia += 10; }
       if (tipo == "neutral") { p.ira += 5; }
@@ -253,23 +301,17 @@
     }
 
     function feedback() {
-
       let mensaje = "✨ Tu personaje está estable";
 
       if (p.ira > 70) mensaje = "🔥 Tu personaje está muy enojado";
       else if (p.energia < 30) mensaje = "⚡ Tu personaje está muy cansado";
       else if (p.conexion < 20) mensaje = "🤝 Tu personaje está muy solo";
 
-      contenido.innerHTML = HUD() + `
-<h2>${mensaje}</h2>
-
-<button onclick="hub()">🌍 Volver</button>
-<button onclick="mision()">🎯 Ver misión</button>
-`;
+      document.getElementById('feedback-mensaje').textContent = mensaje;
+      mostrarPantalla('screen-feedback');
     }
 
     function mision() {
-
       let principal = "";
       let secundaria = "";
 
@@ -290,20 +332,38 @@
         secundaria = "🎯 Elegir algo pequeño para mejorar";
       }
 
-      contenido.innerHTML = HUD() + `
-        <h2>🎯 MISIÓN</h2>
-
-        <p><b>Principal:</b> ${principal}</p>
-        <p><b>Otra opción:</b> ${secundaria}</p>
-
-        <button onclick="hub()">🌍 Seguir jugando</button>
-        `;
+      document.getElementById('mision-principal').textContent = principal;
+      document.getElementById('mision-secundaria').textContent = secundaria;
+      mostrarPantalla('screen-mision');
     }
 
     function reset() {
       localStorage.removeItem("exploradorLuc");
       location.reload();
     }
+
+    document.querySelectorAll('[data-avatar]').forEach(btn => {
+      btn.addEventListener('click', () => setAvatar(btn.dataset.avatar));
+    });
+
+    document.querySelectorAll('[data-action]').forEach(btn => {
+      btn.addEventListener('click', () => act(btn.dataset.action, btn.dataset.mundo));
+    });
+
+    document.getElementById('btn-continuar').addEventListener('click', cargar);
+    document.getElementById('btn-nuevo').addEventListener('click', nuevo);
+    document.getElementById('btn-comenzar').addEventListener('click', crear);
+    document.getElementById('btn-gamer').addEventListener('click', gamer);
+    document.getElementById('btn-energia').addEventListener('click', energia);
+    document.getElementById('btn-social').addEventListener('click', social);
+    document.getElementById('btn-evento').addEventListener('click', () => {
+      if (!document.getElementById('btn-evento').disabled) evento();
+    });
+    document.getElementById('btn-mision').addEventListener('click', mision);
+    document.getElementById('btn-reset').addEventListener('click', reset);
+    document.getElementById('btn-volver').addEventListener('click', hub);
+    document.getElementById('btn-ver-mision').addEventListener('click', mision);
+    document.getElementById('btn-seguir').addEventListener('click', hub);
 
   </script>
 </body>
