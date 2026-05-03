@@ -100,7 +100,7 @@
     .fill {
       height: 100%;
       border-radius: 10px;
-      transition: width 0.6s ease;
+      transition: width 0.6s ease-out;
     }
 
     .vida { background: #00ffcc; }
@@ -442,9 +442,8 @@
     // ═══════════════════════════════════════
 
     function renderHub() {
-
       // Mostrar botón reset
-      document.getElementById('btn-reset').style.display = 'block';
+      habilitarBotonReset();
       mostrarPantalla('screen-hub');
       guardar();
 
@@ -477,6 +476,12 @@
       missionBtn.disabled = !misionOk;
       missionBtn.textContent = '🎯 Ver misión ' + (misionOk ? '🔓' : '🔒');
       missionBtn.onclick = () => goTo('MISION');
+    }
+
+    
+    function habilitarBotonReset() {
+      document.getElementById('btn-reset').onclick = reset;
+      document.getElementById('btn-reset').style.display = 'block';
     }
 
     // ═══════════════════════════════════════
@@ -613,12 +618,14 @@
 
     function startDrag(e) {
       dragging = e.currentTarget;
+      dragging.querySelector('.fill').style.transition = 'width 0.1s ease';
       updateBarFromEvent(dragging, e.clientX);
     }
 
     function startDragTouch(e) {
       e.preventDefault();
       dragging = e.currentTarget;
+      dragging.querySelector('.fill').style.transition = 'width 0.1s ease';
       updateBarFromEvent(dragging, e.touches[0].clientX);
     }
 
@@ -636,6 +643,7 @@
     function stopDrag() {
       if (dragging) {
         dragging.querySelector('.bar-tooltip').style.display = 'none';
+        dragging.querySelector('.fill').style.transition = '';
         guardar();
         dragging = null;
       }
@@ -651,7 +659,6 @@
 
       let fill = bar.querySelector('.fill');
       fill.style.width = pct + '%';
-      fill.style.transition = 'none';
 
       let tooltip = bar.querySelector('.bar-tooltip');
       tooltip.textContent = stat.charAt(0).toUpperCase() + stat.slice(1) + ': ' + pct + '%';
@@ -665,7 +672,6 @@
 
     function init() {
       setupDraggableBars();
-      document.getElementById('btn-reset').onclick = reset;
       let saved = localStorage.getItem("exploradorLuc");
       if (saved) {
         let data = JSON.parse(saved);
