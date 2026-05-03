@@ -49,6 +49,22 @@
       border: 1px solid #00ffcc;
       border-radius: 12px;
       margin: 20px;
+      position: relative;
+    }
+
+    #btn-reset {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 13px;
+      padding: 6px 12px;
+      opacity: 0.6;
+      z-index: 10;
+      display: none;
+    }
+
+    #btn-reset:hover {
+      opacity: 1;
     }
 
     .bar {
@@ -138,6 +154,7 @@
 
   <div class="box">
     <div id="hud" style="display:none">
+      <button id="btn-reset">🗑 Reiniciar</button>
       <div id="hud-title"></div>
       ❤️<div class="bar" data-stat="vida">
         <div class="bar-tooltip"></div>
@@ -181,8 +198,9 @@
       <h2>🌍 Elige a dónde ir</h2>
       <div id="hub-categories"></div>
       <br>
+      <div id="hub-event"></div>
+      <br>
       <button id="btn-mision" disabled>🎯 Ver misión</button>
-      <button id="btn-reset">🗑 Reiniciar</button>
     </div>
 
     <div class="screen box" id="screen-categoria">
@@ -195,7 +213,6 @@
       <h2 id="feedback-titulo"></h2>
       <p id="feedback-mensaje"></p>
       <button id="btn-volver">🌍 Volver</button>
-      <button id="btn-ver-mision">🎯 Ver misión</button>
     </div>
 
     <div class="screen box" id="screen-mision">
@@ -425,6 +442,9 @@
     // ═══════════════════════════════════════
 
     function renderHub() {
+
+      // Mostrar botón reset
+      document.getElementById('btn-reset').style.display = 'block';
       mostrarPantalla('screen-hub');
       guardar();
 
@@ -436,15 +456,16 @@
         html += `<button class="hub-btn" data-cat="${cat.id}">
           ${cat.icon} ${cat.label} ${done ? '✅' : '🔓'}</button>`;
       });
+      container.innerHTML = html;
 
       const evUnlocked = eventosDesbloqueados();
       const evDone = progreso.evento;
-      html += `<button class="hub-btn" data-cat="evento" ${evUnlocked ? '' : 'disabled'}>
+      let eventHTML = `<button class="hub-btn" data-cat="evento" ${evUnlocked ? '' : 'disabled'}>
         ${EVENTO.icon} ${EVENTO.label} ${evDone ? '✅' : evUnlocked ? '🔓' : '🔒'}</button>`;
 
-      container.innerHTML = html;
+      document.getElementById('hub-event').innerHTML = eventHTML
 
-      container.querySelectorAll('.hub-btn:not([disabled])').forEach(btn => {
+      document.querySelectorAll('.hub-btn:not([disabled])').forEach(btn => {
         btn.addEventListener('click', () => {
           currentQIndex = 0;
           goTo('CATEGORIA', { id: btn.dataset.cat });
@@ -456,8 +477,6 @@
       missionBtn.disabled = !misionOk;
       missionBtn.textContent = '🎯 Ver misión ' + (misionOk ? '🔓' : '🔒');
       missionBtn.onclick = () => goTo('MISION');
-
-      document.getElementById('btn-reset').onclick = reset;
     }
 
     // ═══════════════════════════════════════
@@ -646,6 +665,7 @@
 
     function init() {
       setupDraggableBars();
+      document.getElementById('btn-reset').onclick = reset;
       let saved = localStorage.getItem("exploradorLuc");
       if (saved) {
         let data = JSON.parse(saved);
