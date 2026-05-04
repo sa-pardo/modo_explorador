@@ -1,0 +1,14 @@
+.preguntaBox {
+  border: 1px solid #00ffcc;
+  border-radius: 10px;
+  padding: 15px;
+  margin: 12px 0;
+  background: #0d0d0d;
+}
+
+.progressText {
+  color: #00ffcc;
+  opacity: 0.6;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
