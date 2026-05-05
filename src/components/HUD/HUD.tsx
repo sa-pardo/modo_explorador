@@ -20,12 +20,16 @@ export function HUD() {
 
   return (
     <div className={styles.hud}>
-      <button className={styles.resetBtn} onClick={handleReset}>🗑 Reiniciar</button>
-      <div>{player.avatar} {player.nombre}</div>
-      <DraggableBar stat="vida"     value={player.vida}     icon="❤️" fillClass="vida"     onChange={handleStatChange} onDragEnd={() => {}} />
-      <DraggableBar stat="energia"  value={player.energia}  icon="⚡" fillClass="energia"  onChange={handleStatChange} onDragEnd={() => {}} />
-      <DraggableBar stat="ira"      value={player.ira}      icon="🔥" fillClass="ira"      onChange={handleStatChange} onDragEnd={() => {}} />
-      <DraggableBar stat="conexion" value={player.conexion} icon="🤝" fillClass="conexion" onChange={handleStatChange} onDragEnd={() => {}} />
+      <div className={styles.topRow}>
+        <div>
+          {player.avatar} {player.nombre}
+        </div>
+        <button className={styles.resetBtn} onClick={handleReset}>🗑 Reiniciar</button>
+      </div>
+      <DraggableBar stat="vida"     value={player.vida}     icon="❤️" label="Vida"     fillClass="vida"     onChange={handleStatChange} onDragEnd={() => {}} />
+      <DraggableBar stat="energia"  value={player.energia}  icon="⚡" label="Energía"   fillClass="energia"  onChange={handleStatChange} onDragEnd={() => {}} />
+      <DraggableBar stat="ira"      value={player.ira}      icon="🔥" label="Ira"      fillClass="ira"      onChange={handleStatChange} onDragEnd={() => {}} />
+      <DraggableBar stat="conexion" value={player.conexion} icon="🤝" label="Conexión" fillClass="conexion" onChange={handleStatChange} onDragEnd={() => {}} />
     </div>
   );
 }

@@ -8,10 +8,11 @@ interface Props {
   onChange: (stat: StatName, value: number) => void;
   onDragEnd: () => void;
   icon: string;
+  label: string;
   fillClass: string;
 }
 
-export function DraggableBar({ stat, value, icon, fillClass, onChange, onDragEnd }: Props) {
+export function DraggableBar({ stat, value, icon, label, fillClass, onChange, onDragEnd }: Props) {
   const { barRef, fillRef, tooltipRef, handlers } = useDraggableBar({
     stat,
     onDrag: onChange,
@@ -19,8 +20,12 @@ export function DraggableBar({ stat, value, icon, fillClass, onChange, onDragEnd
   });
 
   return (
-    <div>
-      {icon}
+    <div className={styles.barRow}>
+      <div className={styles.labelRow}>
+        <span className={styles.icon}>{icon}</span>
+        <span className={styles.name}>{label}</span>
+        <span className={styles.value} key={value}>{value}</span>
+      </div>
       <div
         ref={barRef}
         className={styles.bar}
