@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useReducer, useCallback, useEffect } from 'react';
-import type { GameState, Screen, CategoriaId, Jugador, Progreso } from '../types/game';
+import type { GameState, Screen, CategoriaId, Jugador, Progreso, Opcion } from '../types/game';
 import { getDefaultPlayer, getDefaultProgreso, getCategoryConfig, aplicarEfectos } from '../utils/helpers';
+
+const SAVE_KEY = 'player';
 
 // ── Actions ──
 type GameAction =
@@ -8,7 +10,7 @@ type GameAction =
   | { type: 'SET_NOMBRE'; nombre: string }
   | { type: 'SET_AVATAR'; avatar: string }
   | { type: 'NEW_GAME' }
-  | { type: 'ANSWER_QUESTION'; categoryId: CategoriaId; optionIndex: number }
+  | { type: 'ANSWER_QUESTION'; categoryId: CategoriaId; answer: Opcion }
   | { type: 'UPDATE_STAT'; stat: string; value: number }
   | { type: 'LOAD_SAVE'; player: Jugador; progreso: Progreso }
   | { type: 'RESET' };
@@ -20,6 +22,19 @@ const initialState: GameState = {
   currentCategoryId: null,
   currentQIndex: 0,
 };
+
+function getData() {
+  try {
+    const saved = localStorage.getItem(SAVE_KEY);
+    if (saved) {
+      const data = JSON.parse(saved);
+      return { player: data.player, progreso: data.progreso };
+    }
+  } catch(error) {
+    console.error('Error loading save data', error);    
+  }
+  return { player: getDefaultPlayer(), progreso: getDefaultProgreso() };
+}
 
 function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
@@ -41,8 +56,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       if (!cat) return state;
       const question = cat.questions[state.currentQIndex];
       if (!question) return state;
-      const option = question.options[action.optionIndex];
-      const newPlayer = aplicarEfectos(state.player, option.effects);
+      const option = action.answer;
+      const newPlayer = aplicarEfectos(state.player, cat, option);
       const newIndex = state.currentQIndex + 1;
 
       if (newIndex >= cat.questions.length) {
@@ -71,8 +86,11 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         progreso: action.progreso,
       };
     case 'RESET':
-      localStorage.removeItem('exploradorLuc');
-      return { ...initialState };
+      const data = getData();
+      const player = data.player;
+      const newData = { ...initialState, screen: 'HUB' as const, player: {...initialState.player, avatar: player.avatar, nombre: player.nombre }};
+      localStorage.setItem(SAVE_KEY, JSON.stringify({ player: newData.player, progreso: getDefaultProgreso() }));
+      return newData;
     default:
       return state;
   }
@@ -87,14 +105,12 @@ interface GameContextValue {
 
 const GameContext = createContext<GameContextValue | null>(null);
 
-const SAVE_KEY = 'exploradorLuc';
-
 function computeInitialState(): GameState {
   try {
     const saved = localStorage.getItem(SAVE_KEY);
     if (saved) {
       const data = JSON.parse(saved);
-      return { ...initialState, screen: 'INICIO', player: data.p, progreso: data.progreso };
+      return { ...initialState, screen: 'INICIO', player: data.player, progreso: data.progreso };
     }
   } catch { /* ignore */ }
   return initialState;
@@ -105,7 +121,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   // Persistir en cada cambio de estado
   useEffect(() => {
-    localStorage.setItem(SAVE_KEY, JSON.stringify({ p: state.player, progreso: state.progreso }));
+    localStorage.setItem(SAVE_KEY, JSON.stringify({ player: state.player, progreso: state.progreso }));
   }, [state.player, state.progreso]);
 
   const goTo = useCallback((screen: Screen, categoryId?: CategoriaId) => {

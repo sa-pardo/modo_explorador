@@ -1,4 +1,5 @@
 import { useGame } from '../../context/GameContext';
+import { Opcion } from '../../types/game';
 import { getCategoryConfig } from '../../utils/helpers';
 import styles from './CategoriaScreen.module.css';
 
@@ -14,11 +15,11 @@ export function CategoriaScreen() {
     i === state.currentQIndex ? '●' : i < state.currentQIndex ? '○' : '·'
   ).join('');
 
-  const handleOptionClick = (optionIndex: number) => {
+  const handleOptionClick = (option: Opcion) => {
     dispatch({
       type: 'ANSWER_QUESTION',
       categoryId: cat.id,
-      optionIndex,
+      answer: option
     });
   };
 
@@ -32,7 +33,7 @@ export function CategoriaScreen() {
         <p style={{ fontSize: 16 }}>{q.text}</p>
       </div>
       {q.options.map((opt, idx) => (
-        <button key={idx} onClick={() => handleOptionClick(idx)}>
+        <button key={idx} onClick={() => handleOptionClick(opt)}>
           {opt.text}
         </button>
       ))}

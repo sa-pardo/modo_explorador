@@ -12,7 +12,6 @@ export function HUD() {
 
   const handleReset = () => {
     dispatch({ type: 'RESET' });
-    window.location.reload();
   };
 
   // Ocultar HUD en INICIO y CREACION
@@ -26,10 +25,10 @@ export function HUD() {
         </div>
         <button className={styles.resetBtn} onClick={handleReset}>🗑 Reiniciar</button>
       </div>
-      <DraggableBar stat="vida"     value={player.vida}     icon="❤️" label="Vida"     fillClass="vida"     onChange={handleStatChange} onDragEnd={() => {}} />
-      <DraggableBar stat="energia"  value={player.energia}  icon="⚡" label="Energía"   fillClass="energia"  onChange={handleStatChange} onDragEnd={() => {}} />
-      <DraggableBar stat="ira"      value={player.ira}      icon="🔥" label="Ira"      fillClass="ira"      onChange={handleStatChange} onDragEnd={() => {}} />
-      <DraggableBar stat="conexion" value={player.conexion} icon="🤝" label="Conexión" fillClass="conexion" onChange={handleStatChange} onDragEnd={() => {}} />
+      <DraggableBar stat='ira' value={player.ira} icon='🔥' label='Ira' onChange={handleStatChange} onDragEnd={() => { }} />
+      <DraggableBar stat='confusion' value={player.confusion} icon='🧠' label='Confusión' onChange={handleStatChange} onDragEnd={() => { }} />
+      <DraggableBar stat='miedo' value={player.miedo} icon='‼️' label='Miedo' onChange={handleStatChange} onDragEnd={() => { }} />
+      <DraggableBar stat='desconexion' value={player.desconexion} icon='⛓️‍💥' label='Desconexión' onChange={handleStatChange} onDragEnd={() => { }} />
     </div>
   );
 }

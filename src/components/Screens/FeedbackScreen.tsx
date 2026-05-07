@@ -3,6 +3,7 @@ import { getCategoryConfig, getStatMessage, misionDesbloqueada } from '../../uti
 
 export function FeedbackScreen() {
   const { state, dispatch } = useGame();
+  const player = state.player;
   const cat = getCategoryConfig(state.currentCategoryId);
   if (!cat) return null;
 
@@ -11,7 +12,12 @@ export function FeedbackScreen() {
   return (
     <div className="screen box">
       <h2>✨ ¡Completaste: {cat.label}!</h2>
-      <p>{getStatMessage(state.player)}</p>
+      <div>
+        <p>{player.ira >= 75 && getStatMessage('ira')}</p>
+        <p>{player.confusion >= 75 && getStatMessage('confusion')}</p>
+        <p>{player.miedo >= 75 && getStatMessage('miedo')}</p>
+        <p>{player.desconexion >= 75 && getStatMessage('desconexion')}</p>
+      </div>
       <button onClick={() => dispatch({ type: 'GO_TO', screen: 'HUB' })}>
         🌍 Volver
       </button>

@@ -8,7 +8,7 @@ export function InicioScreen() {
     <div className="screen box">
       <h2>Bienvenido de vuelta</h2>
       <p style={{ fontSize: 18 }}>
-        {player.avatar} {player.nombre} — Stats: ❤{player.vida} ⚡{player.energia} 🔥{player.ira} 🤝{player.conexion}
+        {player.avatar} {player.nombre} — Stats: ❤{player.ira} ⚡{player.confusion} 🔥{player.miedo} 🤝{player.desconexion}
       </p>
       <button onClick={() => dispatch({ type: 'GO_TO', screen: 'HUB' })}>
         ▶ Continuar

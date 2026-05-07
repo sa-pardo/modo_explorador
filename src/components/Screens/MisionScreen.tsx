@@ -5,29 +5,36 @@ export function MisionScreen() {
   const { player } = state;
 
   let principal: string;
-  let secundaria: string;
+  let secundaria: string | null = null;
 
-  if (player.ira > 60) {
-    principal = "🔥 Notar cuándo te enojas";
-    secundaria = "🌱 Tomarte un segundo antes de reaccionar";
-  } else if (player.conexion < 30) {
-    principal = "🤝 Hablar con alguien";
-    secundaria = "🚶 Salir un rato de la pieza";
-  } else if (player.energia < 40) {
-    principal = "😴 Dormir mejor";
-    secundaria = "📴 Dejar el celular antes de dormir";
+  if (player.confusion >= 75) {
+    principal = 'Dos veces por día, voy a detectar qué siento en mi cuerpo';
+  } else if (player.ira >= 75) {
+    principal = 'Cuando sienta que una emoción me supere, voy a ser una tortuga';
+    secundaria = 'Pensar cuándo me ha pasado antes';
+  } else if (player.miedo >= 75) {
+    principal = 'Nombrar emociones que conozco';
+    secundaria = 'Pensar cuándo me ha pasado antes';
+  } else if (player.desconexion >= 75) {
+    principal = 'Pensar en al menos tres razones por las que podría estar pasando esto';
+    secundaria = 'Decir lo que me molesta';
   } else {
-    principal = "🌟 Seguir haciendo lo que te está ayudando";
-    secundaria = "🎯 Elegir algo pequeño para mejorar";
+    principal = 'Piensa, ¿Qué te gustaría reforzar?';
+  }
+  
+  if (player.ira >= 75 && player.confusion >= 75 && player.miedo >= 75 && player.desconexion >= 75) {
+    principal = 'Dos veces por día, voy a detectar qué siento en mi cuerpo';
+    secundaria = null;
   }
 
+
   return (
-    <div className="screen box">
+    <div className='screen box'>
       <h2>🎯 MISIÓN</h2>
       <p><b>Principal:</b> {principal}</p>
-      <p><b>Otra opción:</b> {secundaria}</p>
+      {secundaria && <p><b>Otra opción:</b> {secundaria}</p>}
       <button onClick={() => dispatch({ type: 'GO_TO', screen: 'HUB' })}>
-        🌍 Seguir jugando
+        🌍 Volver
       </button>
     </div>
   );

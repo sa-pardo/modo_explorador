@@ -1,29 +1,24 @@
-export type StatName = 'vida' | 'energia' | 'ira' | 'conexion';
+export type StatName = 'ira' | 'confusion' | 'miedo' | 'desconexion';
 
 export interface Efectos {
-  vida?: number;
-  energia?: number;
   ira?: number;
-  conexion?: number;
+  confusion?: number;
+  miedo?: number;
+  desconexion?: number;
 }
 
 export interface Jugador {
   nombre: string;
   avatar: string;
-  vida: number;
-  energia: number;
   ira: number;
-  conexion: number;
+  confusion: number;
+  miedo: number;
+  desconexion: number;
 }
 
-export interface Progreso {
-  gamer: boolean;
-  energia: boolean;
-  social: boolean;
-  evento: boolean;
-}
+export type Progreso = Record<CategoriaId, boolean>;
 
-export type CategoriaId = 'gamer' | 'energia' | 'social' | 'evento';
+export type CategoriaId = 'zona-combate' | 'laboratorio-mental' | 'portal-decisiones' | 'base-energia';
 
 export interface Opcion {
   text: string;
