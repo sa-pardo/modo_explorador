@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Modo Explorador Luc</title>
+
+  <style>
+    body {
+      background: radial-gradient(circle, #0a0a0a, #000);
+      color: #00ffcc;
+      font-family: 'Courier New', monospace;
+      text-align: center;
+    }
+
+    button {
+      padding: 10px 18px;
+      margin: 6px;
+      border-radius: 10px;
+      border: none;
+      background: #1f1f1f;
+      color: #00ffcc;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #00ffcc;
+      color: black;
+    }
+
+    button.activo {
+      background: #00ffcc;
+      color: black;
+      box-shadow: 0 0 10px #00ffcc;
+    }
+
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    button:disabled:hover {
+      background: #1f1f1f;
+      color: #00ffcc;
+    }
+
+    .box {
+      padding: 20px;
+      border: 1px solid #00ffcc;
+      border-radius: 12px;
+      margin: 20px;
+      position: relative;
+    }
+
+    #btn-reset {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 13px;
+      padding: 6px 12px;
+      opacity: 0.6;
+      z-index: 10;
+      display: none;
+    }
+
+    #btn-reset:hover {
+      opacity: 1;
+    }
+
+    .bar {
+      height: 18px;
+      background: #222;
+      border-radius: 10px;
+      margin: 5px;
+      cursor: ew-resize;
+      position: relative;
+      user-select: none;
+    }
+
+    .bar:hover {
+      background: #2a2a2a;
+    }
+
+    .bar-tooltip {
+      position: absolute;
+      top: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1f1f1f;
+      color: #00ffcc;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      pointer-events: none;
+      display: none;
+      white-space: nowrap;
+      border: 1px solid #00ffcc;
+    }
+
+    .fill {
+      height: 100%;
+      border-radius: 10px;
+      transition: width 0.6s ease-out;
+    }
+
+    .vida { background: #00ffcc; }
+    .energia { background: #3399ff; }
+    .ira { background: #ff4444; }
+    .conexion { background: #66ff99; }
+
+    #input-nombre {
+      background: #1f1f1f;
+      border: 2px solid #00ffcc;
+      border-radius: 10px;
+      color: #00ffcc;
+      font-family: 'Courier New', monospace;
+      font-size: 16px;
+      padding: 10px 18px;
+      outline: none;
+      transition: box-shadow 0.3s ease;
+    }
+
+    #input-nombre::placeholder {
+      color: #00ffcc;
+      opacity: 0.4;
+    }
+
+    #input-nombre:focus {
+      box-shadow: 0 0 12px #00ffcc;
+    }
+
+    .screen { display: none; }
+
+    .pregunta-box {
+      border: 1px solid #00ffcc;
+      border-radius: 10px;
+      padding: 15px;
+      margin: 12px 0;
+      background: #0d0d0d;
+    }
+
+    .progress-text {
+      color: #00ffcc;
+      opacity: 0.6;
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>🎮 MODO EXPLORADOR LUC</h1>
+
+  <div class="box">
+    <div id="hud" style="display:none">
+      <button id="btn-reset">🗑 Reiniciar</button>
+      <div id="hud-title"></div>
+      ❤️<div class="bar" data-stat="vida">
+        <div class="bar-tooltip"></div>
+        <div id="bar-vida" class="fill vida"></div>
+      </div>
+      ⚡<div class="bar" data-stat="energia">
+        <div class="bar-tooltip"></div>
+        <div id="bar-energia" class="fill energia"></div>
+      </div>
+      🔥<div class="bar" data-stat="ira">
+        <div class="bar-tooltip"></div>
+        <div id="bar-ira" class="fill ira"></div>
+      </div>
+      🤝<div class="bar" data-stat="conexion">
+        <div class="bar-tooltip"></div>
+        <div id="bar-conexion" class="fill conexion"></div>
+      </div>
+    </div>
+
+    <div class="screen box" id="screen-inicio">
+      <h2>Bienvenido de vuelta</h2>
+      <p id="inicio-personaje" style="font-size:18px"></p>
+      <button id="btn-continuar">▶ Continuar</button>
+      <button id="btn-nuevo">🆕 Empezar de nuevo</button>
+    </div>
+
+    <div class="screen box" id="screen-crear">
+      <h2>Crear personaje</h2>
+      <input id="input-nombre" placeholder="Tu nombre"><br><br>
+      <p>Elige tu avatar:</p>
+      <button data-avatar="😎">😎</button>
+      <button data-avatar="🤖">🤖</button>
+      <button data-avatar="🎮">🎮</button>
+      <div id="comenzar-container" style="display:none">
+        <p>Cuando estés listo:</p>
+        <button id="btn-comenzar">Comenzar juego</button>
+      </div>
+    </div>
+
+    <div class="screen box" id="screen-hub">
+      <h2>🌍 Elige a dónde ir</h2>
+      <div id="hub-categories"></div>
+      <br>
+      <div id="hub-event"></div>
+      <br>
+      <button id="btn-mision" disabled>🎯 Ver misión</button>
+    </div>
+
+    <div class="screen box" id="screen-categoria">
+      <h2 id="cat-title"></h2>
+      <p class="progress-text" id="cat-progress"></p>
+      <div id="cat-content"></div>
+    </div>
+
+    <div class="screen box" id="screen-feedback">
+      <h2 id="feedback-titulo"></h2>
+      <p id="feedback-mensaje"></p>
+      <button id="btn-volver">🌍 Volver</button>
+    </div>
+
+    <div class="screen box" id="screen-mision">
+      <h2>🎯 MISIÓN</h2>
+      <p><b>Principal:</b> <span id="mision-principal"></span></p>
+      <p><b>Otra opción:</b> <span id="mision-secundaria"></span></p>
+      <button id="btn-seguir">🌍 Seguir jugando</button>
+    </div>
+  </div>
+
+  <script>
+    // ═══════════════════════════════════════
+    //  CONFIG: Categorías y preguntas
+    //  Agregar categorías o preguntas = editar solo esta sección
+    // ═══════════════════════════════════════
+
+    const CATEGORIES = [
+      {
+        id: 'gamer',
+        icon: '🎮',
+        label: 'Juego',
+        questions: [
+          {
+            text: 'Perdiste una partida importante...',
+            options: [
+              { text: '😤 Salir enojado del juego', effects: { ira: 15, energia: -10 } },
+              { text: '🤐 Quedarte callado',        effects: { ira: 5 } },
+              { text: '🧠 Intentar de nuevo',      effects: { ira: -5, energia: 10 } },
+            ]
+          },
+          {
+            text: 'Un amigo te invita a jugar en equipo...',
+            options: [
+              { text: '🚫 Prefieres jugar solo',    effects: { conexion: -10 } },
+              { text: '✅ Aceptar y jugar juntos', effects: { conexion: 15, ira: -5 } },
+              { text: '😒 Aceptar de mala gana',   effects: { ira: 5 } },
+            ]
+          },
+        ]
+      },
+      {
+        id: 'energia',
+        icon: '😴',
+        label: 'Energía',
+        questions: [
+          {
+            text: 'No dormiste bien...',
+            options: [
+              { text: '🎮 Seguir jugando igual', effects: { energia: -15 } },
+              { text: '🛌 Descansar un rato',    effects: { energia: 20 } },
+              { text: '📱 Seguir en pantalla',   effects: { energia: -10, ira: 5 } },
+            ]
+          },
+          {
+            text: 'Son las 11pm y tenés sueño...',
+            options: [
+              { text: '📱 Scrollear en el celu', effects: { energia: -10 } },
+              { text: '🛌 Irte a dormir',        effects: { energia: 15 } },
+              { text: '🎮 Una partida más',      effects: { energia: -5 } },
+            ]
+          },
+        ]
+      },
+      {
+        id: 'social',
+        icon: '👥',
+        label: 'Personas',
+        questions: [
+          {
+            text: 'Un amigo te invita a salir',
+            options: [
+              { text: '🚪 No ir, quedarte en la pieza', effects: { conexion: -15 } },
+              { text: '🤝 Ir',                          effects: { conexion: 20 } },
+              { text: '😐 Decir "tal vez"',             effects: { conexion: 5 } },
+            ]
+          },
+        ]
+      },
+    ];
+
+    const EVENTO = {
+      id: 'evento',
+      icon: '⚠',
+      label: 'Situación difícil',
+      questions: [
+        {
+          text: 'Hoy fue un día complicado...',
+          options: [
+            { text: '🔒 Aislarse',          effects: { conexion: -20 } },
+            { text: '💬 Hablar con alguien', effects: { conexion: 20, ira: -5 } },
+            { text: '💥 Enojarse mucho',    effects: { ira: 20 } },
+          ]
+        },
+      ],
+    };
+
+    // ═══════════════════════════════════════
+    //  STATE: Jugador, progreso, runtime
+    // ═══════════════════════════════════════
+
+    let p;                     // { nombre, avatar, vida, energia, ira, conexion }
+    let progreso;              // { gamer: bool, energia: bool, social: bool, evento: bool }
+    let currentCategoryId;     // id de la categoría activa
+    let currentQIndex;         // índice de pregunta actual (0-based)
+    let dragging;              // control del drag de barras
+
+    // ═══════════════════════════════════════
+    //  HELPERS
+    // ═══════════════════════════════════════
+
+    function clamp(v, min, max) {
+      return Math.max(min, Math.min(max, v));
+    }
+
+    function guardar() {
+      localStorage.setItem("exploradorLuc", JSON.stringify({ p, progreso }));
+    }
+
+    function getCategoryConfig(id) {
+      return CATEGORIES.find(c => c.id === id) || (id === EVENTO.id ? EVENTO : null);
+    }
+
+    function eventosDesbloqueados() {
+      return CATEGORIES.every(c => progreso[c.id]);
+    }
+
+    function misionDesbloqueada() {
+      return eventosDesbloqueados() && progreso.evento;
+    }
+
+    function getStatMessage() {
+      if (p.ira > 70)       return "🔥 Tu personaje está muy enojado";
+      if (p.energia < 30)   return "⚡ Tu personaje está muy cansado";
+      if (p.conexion < 20)  return "🤝 Tu personaje está muy solo";
+      return "✨ Tu personaje está estable";
+    }
+
+    function aplicarEfectos(effects) {
+      for (let [stat, delta] of Object.entries(effects)) {
+        p[stat] = clamp(p[stat] + delta, 0, 100);
+      }
+    }
+
+    function mostrarPantalla(id) {
+      document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+      document.getElementById(id).style.display = 'block';
+
+      let conHUD = !['screen-inicio', 'screen-crear'].includes(id);
+      document.getElementById('hud').style.display = conHUD ? 'block' : 'none';
+
+      if (conHUD) actualizarHUD();
+    }
+
+    function actualizarHUD() {
+      document.getElementById('hud-title').textContent = `${p.avatar} ${p.nombre}`;
+      document.getElementById('bar-vida').style.width = p.vida + '%';
+      document.getElementById('bar-energia').style.width = p.energia + '%';
+      document.getElementById('bar-ira').style.width = p.ira + '%';
+      document.getElementById('bar-conexion').style.width = p.conexion + '%';
+    }
+
+    // ═══════════════════════════════════════
+    //  STATE MACHINE
+    // ═══════════════════════════════════════
+
+    function goTo(state, payload) {
+      switch (state) {
+        case 'INICIO':     renderInicio();                   break;
+        case 'CREACION':   renderCreacion();                 break;
+        case 'HUB':        renderHub();                      break;
+        case 'CATEGORIA':  renderCategoria(payload.id);      break;
+        case 'FEEDBACK':   renderFeedback(payload.id);       break;
+        case 'MISION':     renderMision();                   break;
+      }
+    }
+
+    // ═══════════════════════════════════════
+    //  RENDER: INICIO
+    // ═══════════════════════════════════════
+
+    function renderInicio() {
+      mostrarPantalla('screen-inicio');
+      document.getElementById('inicio-personaje').textContent =
+        `${p.avatar} ${p.nombre}  —  Stats: ❤${p.vida} ⚡${p.energia} 🔥${p.ira} 🤝${p.conexion}`;
+
+      document.getElementById('btn-continuar').onclick = () => {
+        goTo('HUB');
+      };
+      document.getElementById('btn-nuevo').onclick = () => {
+        nuevo();
+        goTo('CREACION');
+      };
+    }
+
+    // ═══════════════════════════════════════
+    //  RENDER: CREACION
+    // ═══════════════════════════════════════
+
+    function renderCreacion() {
+      mostrarPantalla('screen-crear');
+      document.getElementById('input-nombre').value = p.nombre || '';
+      document.getElementById('comenzar-container').style.display = p.avatar ? 'block' : 'none';
+
+      document.querySelectorAll('[data-avatar]').forEach(btn => {
+        btn.classList.toggle('activo', btn.dataset.avatar === p.avatar);
+        btn.onclick = () => setAvatar(btn.dataset.avatar);
+      });
+
+      document.getElementById('btn-comenzar').onclick = () => {
+        p.nombre = document.getElementById("input-nombre").value.trim();
+        if (!p.nombre) return alert("Escribe un nombre 😊");
+        guardar();
+        goTo('HUB');
+      };
+    }
+
+    function setAvatar(a) {
+      p.avatar = a;
+      document.querySelectorAll('[data-avatar]').forEach(btn => {
+        btn.classList.toggle('activo', btn.dataset.avatar === a);
+      });
+      document.getElementById('comenzar-container').style.display = 'block';
+    }
+
+    // ═══════════════════════════════════════
+    //  RENDER: HUB
+    // ═══════════════════════════════════════
+
+    function renderHub() {
+      // Mostrar botón reset
+      habilitarBotonReset();
+      mostrarPantalla('screen-hub');
+      guardar();
+
+      const container = document.getElementById('hub-categories');
+      let html = '';
+
+      CATEGORIES.forEach(cat => {
+        const done = progreso[cat.id];
+        html += `<button class="hub-btn" data-cat="${cat.id}">
+          ${cat.icon} ${cat.label} ${done ? '✅' : '🔓'}</button>`;
+      });
+      container.innerHTML = html;
+
+      const evUnlocked = eventosDesbloqueados();
+      const evDone = progreso.evento;
+      let eventHTML = `<button class="hub-btn" data-cat="evento" ${evUnlocked ? '' : 'disabled'}>
+        ${EVENTO.icon} ${EVENTO.label} ${evDone ? '✅' : evUnlocked ? '🔓' : '🔒'}</button>`;
+
+      document.getElementById('hub-event').innerHTML = eventHTML
+
+      document.querySelectorAll('.hub-btn:not([disabled])').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentQIndex = 0;
+          goTo('CATEGORIA', { id: btn.dataset.cat });
+        });
+      });
+
+      const missionBtn = document.getElementById('btn-mision');
+      const misionOk = misionDesbloqueada();
+      missionBtn.disabled = !misionOk;
+      missionBtn.textContent = '🎯 Ver misión ' + (misionOk ? '🔓' : '🔒');
+      missionBtn.onclick = () => goTo('MISION');
+    }
+
+    
+    function habilitarBotonReset() {
+      document.getElementById('btn-reset').onclick = reset;
+      document.getElementById('btn-reset').style.display = 'block';
+    }
+
+    // ═══════════════════════════════════════
+    //  RENDER: CATEGORIA (genérica)
+    // ═══════════════════════════════════════
+
+    function renderCategoria(catId) {
+      const cat = getCategoryConfig(catId);
+      currentCategoryId = catId;
+
+      const totalQ = cat.questions.length;
+      const q = cat.questions[currentQIndex];
+
+      mostrarPantalla('screen-categoria');
+      document.getElementById('cat-title').textContent = `${cat.icon} ${cat.label}`;
+
+      let progressHtml = '';
+      for (let i = 0; i < totalQ; i++) {
+        progressHtml += i === currentQIndex ? '●' : (i < currentQIndex ? '○' : '·');
+      }
+      document.getElementById('cat-progress').textContent =
+        `Pregunta ${currentQIndex + 1} de ${totalQ}  ${progressHtml}`;
+
+      const content = document.getElementById('cat-content');
+      let html = `<div class="pregunta-box"><p style="font-size:16px">${q.text}</p></div>`;
+      q.options.forEach((opt, idx) => {
+        html += `<button class="opt-btn" data-idx="${idx}">${opt.text}</button>`;
+      });
+      content.innerHTML = html;
+
+      content.querySelectorAll('.opt-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.dataset.idx);
+          const opt = q.options[idx];
+          aplicarEfectos(opt.effects);
+          guardar();
+
+          currentQIndex++;
+          if (currentQIndex >= totalQ) {
+            progreso[catId] = true;
+            currentQIndex = 0;
+            currentCategoryId = null;
+            guardar();
+            goTo('FEEDBACK', { id: catId });
+          } else {
+            goTo('CATEGORIA', { id: catId });
+          }
+        });
+      });
+    }
+
+    // ═══════════════════════════════════════
+    //  RENDER: FEEDBACK
+    // ═══════════════════════════════════════
+
+    function renderFeedback(catId) {
+      const cat = getCategoryConfig(catId);
+      mostrarPantalla('screen-feedback');
+
+      document.getElementById('feedback-titulo').textContent =
+        `✨ ¡Completaste: ${cat.label}!`;
+      document.getElementById('feedback-mensaje').textContent = getStatMessage();
+
+      document.getElementById('btn-volver').onclick = () => goTo('HUB');
+
+      const verMision = document.getElementById('btn-ver-mision');
+      if (misionDesbloqueada()) {
+        verMision.style.display = 'inline-block';
+        verMision.onclick = () => goTo('MISION');
+      } else {
+        verMision.style.display = 'none';
+      }
+    }
+
+    // ═══════════════════════════════════════
+    //  RENDER: MISION
+    // ═══════════════════════════════════════
+
+    function renderMision() {
+      mostrarPantalla('screen-mision');
+
+      let principal, secundaria;
+      if (p.ira > 60) {
+        principal = "🔥 Notar cuándo te enojas";
+        secundaria = "🌱 Tomarte un segundo antes de reaccionar";
+      } else if (p.conexion < 30) {
+        principal = "🤝 Hablar con alguien";
+        secundaria = "🚶 Salir un rato de la pieza";
+      } else if (p.energia < 40) {
+        principal = "😴 Dormir mejor";
+        secundaria = "📴 Dejar el celular antes de dormir";
+      } else {
+        principal = "🌟 Seguir haciendo lo que te está ayudando";
+        secundaria = "🎯 Elegir algo pequeño para mejorar";
+      }
+
+      document.getElementById('mision-principal').textContent = principal;
+      document.getElementById('mision-secundaria').textContent = secundaria;
+
+      document.getElementById('btn-seguir').onclick = () => goTo('HUB');
+    }
+
+    // ═══════════════════════════════════════
+    //  NUEVO JUEGO / RESET
+    // ═══════════════════════════════════════
+
+    function nuevo() {
+      p = { nombre: "", avatar: "", vida: 80, energia: 60, ira: 20, conexion: 30 };
+      progreso = { gamer: false, energia: false, social: false, evento: false };
+      currentCategoryId = null;
+      currentQIndex = 0;
+    }
+
+    function reset() {
+      localStorage.removeItem("exploradorLuc");
+      location.reload();
+    }
+
+    // ═══════════════════════════════════════
+    //  BARRAS DESLIZABLES
+    // ═══════════════════════════════════════
+
+    function setupDraggableBars() {
+      document.querySelectorAll('.bar').forEach(bar => {
+        bar.addEventListener('mousedown', startDrag);
+        bar.addEventListener('touchstart', startDragTouch, { passive: false });
+      });
+
+      document.addEventListener('mousemove', doDrag);
+      document.addEventListener('touchmove', doDragTouch, { passive: false });
+      document.addEventListener('mouseup', stopDrag);
+      document.addEventListener('touchend', stopDrag);
+    }
+
+    function startDrag(e) {
+      dragging = e.currentTarget;
+      dragging.querySelector('.fill').style.transition = 'width 0.1s ease';
+      updateBarFromEvent(dragging, e.clientX);
+    }
+
+    function startDragTouch(e) {
+      e.preventDefault();
+      dragging = e.currentTarget;
+      dragging.querySelector('.fill').style.transition = 'width 0.1s ease';
+      updateBarFromEvent(dragging, e.touches[0].clientX);
+    }
+
+    function doDrag(e) {
+      if (!dragging) return;
+      updateBarFromEvent(dragging, e.clientX);
+    }
+
+    function doDragTouch(e) {
+      if (!dragging) return;
+      e.preventDefault();
+      updateBarFromEvent(dragging, e.touches[0].clientX);
+    }
+
+    function stopDrag() {
+      if (dragging) {
+        dragging.querySelector('.bar-tooltip').style.display = 'none';
+        dragging.querySelector('.fill').style.transition = '';
+        guardar();
+        dragging = null;
+      }
+    }
+
+    function updateBarFromEvent(bar, clientX) {
+      let stat = bar.dataset.stat;
+      let rect = bar.getBoundingClientRect();
+      let x = clientX - rect.left;
+      let pct = Math.round(Math.max(0, Math.min(100, (x / rect.width) * 100)));
+
+      p[stat] = pct;
+
+      let fill = bar.querySelector('.fill');
+      fill.style.width = pct + '%';
+
+      let tooltip = bar.querySelector('.bar-tooltip');
+      tooltip.textContent = stat.charAt(0).toUpperCase() + stat.slice(1) + ': ' + pct + '%';
+      tooltip.style.display = 'block';
+      tooltip.style.left = Math.max(10, Math.min(90, (x / rect.width) * 100)) + '%';
+    }
+
+    // ═══════════════════════════════════════
+    //  INICIALIZACIÓN
+    // ═══════════════════════════════════════
+
+    function init() {
+      setupDraggableBars();
+      let saved = localStorage.getItem("exploradorLuc");
+      if (saved) {
+        let data = JSON.parse(saved);
+        p = data.p;
+        progreso = data.progreso;
+        currentQIndex = 0;
+        goTo('INICIO');
+      } else {
+        nuevo();
+        goTo('CREACION');
+      }
+    }
+
+    init();
+
+  </script>
+</body>
+
+</html>
